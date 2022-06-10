@@ -1,6 +1,7 @@
 from tkinter import *
 from tkinter import messagebox
 from calc import UPS_calc
+from Excel_creator import excel_create
 
 root = Tk()
 root.title("Калькулятор ИБП - Унибелус")
@@ -34,6 +35,7 @@ label_batteries_ext_num = Label(root, text="Число аккумуляторо�
 label_UPS_ext_num = Label(root, text="Число аккумуляторных расширений, шт", pady=3, justify=RIGHT)
 label_efficiency = Label(root, text="КПД ИБП при работе от батарей, %", pady=3, justify=RIGHT)
 label_power = Label(root, text="Нагрузка, Вт:", pady=3, justify=RIGHT)
+label_max_power = Label(root, text="Макс. выходная мощность ИБП, Вт:", pady=3, justify=RIGHT)
 
 #placing the lables
 label_model.place(relx=0.02, rely=0.05)
@@ -45,10 +47,11 @@ label_batteries_ext_num.place(relx=0.02, rely=0.55)
 label_UPS_ext_num.place(relx=0.02, rely=0.65)
 label_efficiency.place(relx=0.02, rely=0.75)
 label_power.place(relx=0.02, rely=0.85)
+label_max_power.place(relx=0.3, rely=0.05)
 
-#setting up the message field
-label_message = Label(root, fg="green", text="Введите параметры", padx=3)
-label_message.place(relx=0.6, rely=0.075)
+# #setting up the message field
+# label_message = Label(root, fg="green", text="Введите параметры", padx=3)
+# label_message.place(relx=0.6, rely=0.075)
 
 #entry fields for Parameters
 entry_model = Entry(root)
@@ -60,6 +63,7 @@ entry_batteries_ext_num = Entry(root)
 entry_UPS_ext_num = Entry(root)
 entry_efficiency = Entry(root)
 entry_power = Entry(root)
+entry_max_power = Entry(root)
 
 #placing the parameters entry fields
 entry_model.place(relx=0.02, rely=0.10, width = 200)
@@ -71,17 +75,22 @@ entry_batteries_ext_num.place(relx=0.02, rely=0.60, width = 200)
 entry_UPS_ext_num.place(relx=0.02, rely=0.70, width = 200)
 entry_efficiency.place(relx=0.02, rely=0.80, width = 200)
 entry_power.place(relx=0.02, rely=0.90, width = 200)
+entry_max_power.place(relx=0.33, rely=0.10, width = 50)
 
-#setting the default values
-entry_model.insert(0,'EA901P LCDS 36V USB EPO BC')
-entry_UPS_batteries_capacity.insert(0,'7')
-entry_UPS_batteries_num.insert(0,'3')
-entry_UPS_ext_model.insert(0,'Нет')
-entry_batteries_UPS_ext.insert(0,'0')
-entry_batteries_ext_num.insert(0,'0')
-entry_UPS_ext_num.insert(0,'0')
-entry_efficiency.insert(0,'85')
-entry_power.insert(0,'100')
+#getting the values from the data file
+f = open('data.txt', 'r', encoding="utf-8")
+
+entry_model.insert(0,f.readline().replace('\n',''))
+entry_UPS_batteries_capacity.insert(0,f.readline().replace('\n',''))
+entry_UPS_batteries_num.insert(0,f.readline().replace('\n',''))
+entry_UPS_ext_model.insert(0,f.readline().replace('\n',''))
+entry_batteries_UPS_ext.insert(0,f.readline().replace('\n',''))
+entry_batteries_ext_num.insert(0,f.readline().replace('\n',''))
+entry_UPS_ext_num.insert(0,f.readline().replace('\n',''))
+entry_efficiency.insert(0,f.readline().replace('\n',''))
+entry_power.insert(0,f.readline().replace('\n',''))
+entry_max_power.insert(0,f.readline().replace('\n',''))
+f.close()
 
 #text window
 label_text_field = Label(root, text="Результат расчёта:", pady=3, justify=RIGHT)
@@ -93,6 +102,8 @@ result_field.place(relx=0.47, rely=0.2, width = 400, height = 300)
 btn = Button(root, text="Выполнить расчёт", width=15, command=lambda: click())
 btn.place(relx=0.55, rely=0.90)
 
+btn_create_excel = Button(root, text = "Создать файл Excel", width=15, command=lambda: click_create_excel())
+btn_create_excel.place(relx=0.80, rely=0.90)
 
 def click():
     try:
@@ -105,6 +116,9 @@ def click():
         ext_bat_cap = float(entry_batteries_ext_num.get())
         ext_num = int(entry_UPS_ext_num.get())
         efficiency = int(entry_efficiency.get())
+
+        #writing velues to file
+        write_to_file()
 
         result = UPS_calc(power, battery_cap, battery_num, ext_bat_num, ext_bat_cap, ext_num, efficiency)
         result_field.delete("0.0", END)
@@ -120,10 +134,53 @@ def click():
                             f"КПД ИБП: {efficiency} %\n\n"
                             f"Расчётное время автономной работы: {result} мин"
                             )
+
+
     except:
         result_field.delete("0.0", END)
         result = 'Ошибка. Проверьте введённые данные'
         result_field.insert("0.0", result)
 
+def click_create_excel():
+    try:
+        model = entry_model.get()
+        power = float(entry_power.get())
+        battery_cap = float(entry_UPS_batteries_capacity.get())
+        battery_num = int(entry_UPS_batteries_num.get())
+        ext_model = entry_UPS_ext_model.get()
+        ext_bat_num = int(entry_batteries_UPS_ext.get())
+        ext_bat_cap = float(entry_batteries_ext_num.get())
+        ext_num = int(entry_UPS_ext_num.get())
+        efficiency = int(entry_efficiency.get())
+        max_power = int(entry_max_power.get())
+
+    #writing values to file
+        write_to_file()
+
+        excel_create(model, power, battery_cap, battery_num, ext_model, ext_bat_num, ext_bat_cap, ext_num, efficiency, max_power)
+
+        result_field.delete("0.0", END)
+        result = 'Файл Excel сохранён в каталоге с программой: \n' + model.replace(' ', '_') + '.xlsx'
+        result_field.insert("0.0", result)
+
+    except:
+        result_field.delete("0.0", END)
+        result = f'Ошибка. Проверьте введённые данные'
+        result_field.insert("0.0", result)
+
+
+def write_to_file():
+    f = open('data.txt', 'w', encoding="utf-8")
+    f.writelines(entry_model.get() + '\n')
+    f.writelines(entry_UPS_batteries_capacity.get() + '\n')
+    f.writelines(entry_UPS_batteries_num.get() + '\n')
+    f.writelines(entry_UPS_ext_model.get() + '\n')
+    f.writelines(entry_batteries_UPS_ext.get() + '\n')
+    f.writelines(entry_batteries_ext_num.get() + '\n')
+    f.writelines(entry_UPS_ext_num.get() + '\n')
+    f.writelines(entry_efficiency.get() + '\n')
+    f.writelines(entry_power.get() + '\n')
+    f.writelines(entry_max_power.get() + '\n')
+    f.close()
 
 root.mainloop()
