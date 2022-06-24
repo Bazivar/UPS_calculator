@@ -1,6 +1,6 @@
 from cx_Freeze import setup, Executable
 
-executables = [Executable('main.py',targetName='PDF_Header_Changer.exe', base='Win32GUI', icon='Unibelus_ico.ico')]
+executables = [Executable('main.py',targetName='UPS_calc.exe', base='Win32GUI', icon='Unibelus_ico.ico')]
 
 
 
@@ -14,12 +14,12 @@ excludes = ['unicodedata', 'logging', 'unittest', 'email', 'html', 'http', 'urll
 options = {
     'build_exe': {
         'include_msvcr': True,
-        'include_files': ["FreeSans.ttf", "Unibelus_ico.ico", "Unibelus_logo.png"]
+        'include_files': ["data.txt", "Unibelus_ico.ico", "Unibelus_logo.png", 'template.xlsx']
     }
 }
 
-setup(name='Редактор атрибутов PDF-Файлов для сайта Unibelus',
+setup(name='Калькулятор ИБП',
       version='0.0.1',
-      description='Редактор атрибутов PDF-Файлов для сайта Unibelus',
+      description='Калькулятор времени автономной работы ИБП',
       executables=executables,
       options=options)
