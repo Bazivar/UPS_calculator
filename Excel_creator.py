@@ -39,11 +39,11 @@ def excel_create(model, power, battery_cap, battery_num, ext_model, ext_bat_num,
     # sheet['A9'] = 'Аккумуляторное расширение: '
     sheet['A10'] = ext_model
     # sheet['A11'] = 'Число АКБ в аккумуляторном расширении: '
-    sheet['A12'] = str(ext_bat_num)
+    sheet['A12'] = str(ext_bat_num) + ' шт'
     # sheet['A13'] = 'Ёмкость одной АКБ в аккумуляторном расширении: '
     sheet['A14'] = str(ext_bat_cap) + ' Ач'
     # sheet['A15'] = 'Число аккумуляторных расширений: '
-    sheet['A16'] = str(ext_bat_cap) + ' Ач'
+    sheet['A16'] = str(ext_num) + ' шт'
     # sheet['A17'] = 'Максимальная мощность ИБП: '
     sheet['A18'] = str(max_power) + ' Вт'
 

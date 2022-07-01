@@ -23,3 +23,5 @@ setup(name='Калькулятор ИБП',
       description='Калькулятор времени автономной работы ИБП',
       executables=executables,
       options=options)
+
+# python setup.py build
